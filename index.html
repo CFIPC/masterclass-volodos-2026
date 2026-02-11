@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcadi Volodos Masterclass | Theatre Du Vaudeville</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
+            color: #000;
+            background-color: #fff;
+        }
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .burgundy-bg { background-color: #800020; }
+        .burgundy-text { color: #800020; }
+        
+        .hero-section {
+            height: 100vh;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%), 
+                              url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .nav-link {
+            position: relative;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -4px;
+            left: 0;
+            background-color: #800020;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .nav-link.active {
+            color: #800020;
+        }
+
+        /* Dropdown specific styles */
+        .dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        .group:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .color-premium { background-color: #9486c9; }
+        .color-a { background-color: #e5989b; }
+        .color-b { background-color: #a2d2ff; }
+        .color-c { background-color: #b7e4c7; }
+        .color-balcony-a { background-color: #d1b3c4; }
+        .color-balcony-b { background-color: #f9dcc4; }
+
+        .zone-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .zone-row:not(.sold-out):hover {
+            background-color: #fdf2f4;
+        }
+        .zone-selected {
+            background-color: #fdf2f4;
+            border-left: 4px solid #800020;
+        }
+        
+        .sold-out {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background-color: #f9fafb !important;
+            pointer-events: none;
+        }
+        .sold-out .burgundy-text {
+            color: #9ca3af !important;
+        }
+
+        .sale-badge {
+            background-color: #800020;
+            color: white;
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .page-content {
+            display: none;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        .page-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #payment-loader {
+            background-color: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        #notification {
+            transform: translateY(100px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #notification.visible {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+            <div class="text-2xl font-bold tracking-[0.3em] uppercase cursor-pointer" onclick="showPage('info')">Volodos</div>
+            
+            <!-- Updated Navigation with Dropdown -->
+            <div class="flex space-x-6 text-[9px] uppercase tracking-[0.2em] font-bold">
+                <div class="relative group">
+                    <span onclick="showPage('info')" id="nav-info" class="nav-link active inline-block py-2">Information</span>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown-menu absolute left-0 mt-0 w-48 bg-white border border-stone-100 shadow-xl rounded-b-2xl overflow-hidden py-2">
+                        <span onclick="showPage('project')" id="nav-project" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] cursor-pointer transition-colors border-b border-stone-50">Our Project</span>
+                        <span onclick="showPage('bio')" id="nav-bio" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] cursor-pointer transition-colors">Biography</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- "Book Now" Button now triggers a specific scroll function -->
+            <button onclick="goToTickets()" class="burgundy-bg text-white px-8 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black transition shadow-lg text-center">Book Now</button>
+        </div>
+    </nav>
+
+    <main id="page-info" class="page-content active">
+        <header class="hero-section">
+            <div class="max-w-7xl mx-auto px-8 w-full">
+                <div class="max-w-2xl">
+                    <div class="inline-block px-5 py-1.5 border border-white text-[11px] uppercase tracking-[0.4em] font-bold mb-10">
+                        Rare Masterclass
+                    </div>
+                    <h1 class="text-6xl md:text-8xl mb-8 leading-[1.1]">Exceptional <br><span class="italic font-light text-stone-300">Pedagogy</span></h1>
+                    <h2 class="text-3xl md:text-4xl serif mb-12 text-stone-200">Arcadi Volodos</h2>
+                    <div class="flex flex-col md:flex-row md:space-x-12 space-y-2 md:space-y-0 text-sm tracking-[0.2em] uppercase opacity-90 font-semibold text-white">
+                        <p>12 March 2026 | 16-22h</p>
+                        <p>Brussels Theatre du Vaudeville</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="the-occasion" class="py-32 px-8 bg-white">
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-20">
+                    <div class="md:col-span-1">
+                        <h2 class="text-xs uppercase tracking-[0.4em] font-bold burgundy-text mb-6">The Occasion</h2>
+                        <h3 class="text-4xl serif leading-tight text-black">A Dialogue with the Master</h3>
+                    </div>
+                    <div class="md:col-span-2 text-gray-700 leading-relaxed text-xl font-light">
+                        <p class="mb-10 text-black">
+                            Step into the singular sound-world of Arcadi Volodos - an artist who defines himself through silence as much as sound. This masterclass offers a rare opening into the private philosophy of one of the world’s best living pianist.
+                        </p>
+                        <p class="text-black">
+                            Within the intimate acoustics of the Theatre Du Vaudeville, the traditional distance between artist and audience vanishes, allowing for a deep, shared immersion into the infinite poetic nuances of the piano.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Waiting List Section -->
+        <section class="py-24 px-8 bg-stone-50 border-y border-stone-100">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-xs uppercase tracking-[0.4em] font-bold burgundy-text mb-6">Participant Status</h2>
+                <h3 class="text-4xl serif mb-8 text-black">Masterclass is Fully Booked</h3>
+                <p class="text-gray-700 leading-relaxed text-lg font-light mb-10 max-w-2xl mx-auto">
+                    All participant slots for this exclusive masterclass are currently filled. However, we invite you to register for our official waiting list should a position become available.
+                </p>
+                <a href="https://forms.fillout.com/t/wKApjnzJMZus" target="_blank" class="inline-block burgundy-bg text-white px-10 py-4 rounded-full text-[11px] uppercase tracking-widest font-bold hover:bg-black transition shadow-xl">
+                    Register for Waiting List
+                </a>
+            </div>
+        </section>
+
+        <!-- Seating Diagram -->
+        <section class="py-24 bg-white border-y border-stone-100">
+            <div class="max-w-7xl mx-auto px-8 text-black">
+                <h2 class="text-center text-sm uppercase tracking-[0.5em] font-bold mb-16 burgundy-text">Theatre Layout</h2>
+                <div class="overflow-x-auto">
+                    <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[40px] shadow-sm border border-stone-100 min-w-[650px]">
+                        <div class="flex items-center justify-center gap-8 md:gap-12">
+                            <div class="flex gap-2">
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="text-[7px] uppercase font-bold text-stone-400">B Left</div>
+                                    <div class="w-5 h-48 color-balcony-b rounded-sm opacity-60"></div>
+                                </div>
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="text-[7px] uppercase font-bold text-stone-400">A Left</div>
+                                    <div class="w-5 h-48 color-balcony-a rounded-sm opacity-60"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-48 py-2 bg-white text-center font-bold text-[10px] uppercase tracking-[0.4em] rounded-md mb-6 border border-stone-200">Scène</div>
+                                <div class="flex flex-col gap-1 w-64 mb-6 text-[8px] text-white font-bold uppercase tracking-widest text-center">
+                                    <div class="h-8 color-premium flex items-center justify-center">Premium</div>
+                                    <div class="h-8 color-a flex items-center justify-center">Zone A</div>
+                                    <div class="h-8 color-b flex items-center justify-center">Zone B</div>
+                                    <div class="h-8 color-c flex items-center justify-center">Zone C</div>
+                                </div>
+                                <div class="flex flex-col gap-1 w-64 text-[8px] text-white font-bold uppercase tracking-widest text-center">
+                                    <div class="h-7 color-balcony-a flex items-center justify-center">Balcony A Center</div>
+                                    <div class="h-7 color-balcony-b flex items-center justify-center">Balcony B Center</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="text-[7px] uppercase font-bold text-stone-400">A Right</div>
+                                    <div class="w-5 h-48 color-balcony-a rounded-sm opacity-60"></div>
+                                </div>
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="text-[7px] uppercase font-bold text-stone-400">B Right</div>
+                                    <div class="w-5 h-48 color-balcony-b rounded-sm opacity-60"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ticketing Section -->
+        <section id="tickets" class="py-32 px-8 bg-white">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-20">
+                    <h2 class="text-xs uppercase tracking-[0.5em] font-bold burgundy-text mb-6">Ticketing</h2>
+                    <h3 class="text-5xl serif text-black">Secure Your Reservation</h3>
+                    <p class="text-stone-400 mt-4 text-sm font-semibold uppercase tracking-widest"><span class="burgundy-text">Flash Sale:</span> Final Seats Remaining</p>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-16">
+                    <div class="lg:col-span-2 space-y-10">
+                        <div>
+                            <h4 class="text-[10px] uppercase tracking-widest font-bold opacity-30 mb-6 text-black">Ground Floor</h4>
+                            <div class="space-y-4">
+                                <div id="btn-premium" onclick="selectZone('Premium')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-premium rounded-full mr-4"></span>Premium Seating</span>
+                                    <div class="text-right"><span id="price-label-premium" class="burgundy-text font-bold block text-sm italic">Starting from €59</span></div>
+                                </div>
+                                <div id="btn-zone-a" onclick="selectZone('Zone A')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-a rounded-full mr-4"></span>Zone A <span class="sale-badge">Sale</span></span>
+                                    <div class="text-right"><span id="price-label-zone-a" class="burgundy-text font-bold block text-sm italic">Starting from €50</span></div>
+                                </div>
+                                <div id="btn-zone-b" onclick="selectZone('Zone B')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-b rounded-full mr-4"></span>Zone B <span class="sale-badge">Sale</span></span>
+                                    <div class="text-right"><span id="price-label-zone-b" class="burgundy-text font-bold block text-sm italic">Starting from €45</span></div>
+                                </div>
+                                <div id="btn-zone-c" onclick="selectZone('Zone C')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-c rounded-full mr-4"></span>Zone C <span class="sale-badge">Sale</span></span>
+                                    <div class="text-right"><span id="price-label-zone-c" class="burgundy-text font-bold block text-sm italic">Starting from €35</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-[10px] uppercase tracking-widest font-bold opacity-30 mb-6 text-black">Balcony</h4>
+                            <div class="space-y-4">
+                                <div id="btn-balcony-a" onclick="selectZone('Balcony A')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-balcony-a rounded-full mr-4"></span>Balcony A <span class="sale-badge">Sale</span></span>
+                                    <div class="text-right"><span id="price-label-balcony-a" class="burgundy-text font-bold block text-sm italic">Starting from €45</span></div>
+                                </div>
+                                <div id="btn-balcony-b" onclick="selectZone('Balcony B')" class="zone-row p-6 bg-white border border-stone-100 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <span class="font-semibold flex items-center text-sm text-black"><span class="w-3.5 h-3.5 color-balcony-b rounded-full mr-4"></span>Balcony B <span class="sale-badge">Sale</span></span>
+                                    <div class="text-right"><span id="price-label-balcony-b" class="burgundy-text font-bold block text-sm italic">Starting from €35</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <div id="checkout-sidebar" class="bg-white p-10 rounded-3xl shadow-2xl sticky top-28 border border-stone-50 hidden">
+                            <h3 id="side-zone-name" class="text-2xl mb-1 serif text-black">Zone</h3>
+                            <p class="text-[10px] text-stone-400 mb-10 italic">Secured by Stripe encryption.</p>
+                            
+                            <div class="space-y-4 mb-10">
+                                <label class="flex items-center p-5 border rounded-2xl cursor-pointer hover:border-[#800020] transition">
+                                    <input type="radio" name="ticket-type" value="adult" checked onchange="updateTotal()" class="w-4 h-4 accent-[#800020]">
+                                    <div class="ml-5">
+                                        <span class="block text-sm font-bold text-black">Standard Admission</span>
+                                        <span id="price-adult-container" class="text-xs text-stone-400">
+                                            <span id="price-adult-old" class="line-through mr-1 opacity-50"></span>
+                                            <span id="price-adult-new"></span>
+                                        </span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-5 border rounded-2xl cursor-pointer hover:border-[#800020] transition">
+                                    <input type="radio" name="ticket-type" value="student" onchange="updateTotal()" class="w-4 h-4 accent-[#800020]">
+                                    <div class="ml-5">
+                                        <span class="block text-sm font-bold text-black">Student Discount</span>
+                                        <span id="price-student" class="text-xs text-stone-400">€0</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="pt-8 border-t border-stone-100">
+                                <div class="flex justify-between items-center mb-6">
+                                    <span class="uppercase tracking-widest text-[10px] font-bold opacity-50 text-black">Total Due</span>
+                                    <span id="final-total" class="text-2xl font-bold burgundy-text">€0</span>
+                                </div>
+                                <button onclick="handleStripeRedirect()" id="checkout-btn" class="w-full burgundy-bg text-white py-4 rounded-xl text-xs font-bold tracking-widest uppercase hover:bg-black transition-all shadow-lg flex items-center justify-center">
+                                    <span>Pay & Confirm Seat</span>
+                                </button>
+                                <p class="text-center text-[9px] text-stone-300 mt-4 uppercase tracking-widest">Instant Ticket Delivery</p>
+                            </div>
+                        </div>
+                        <div id="placeholder-sidebar" class="bg-white p-12 rounded-3xl text-center border-2 border-dashed border-stone-100">
+                            <p class="text-stone-400 italic text-sm">Please select a seating zone to initiate secure checkout.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <main id="page-project" class="page-content pt-40 px-8 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-xs uppercase tracking-[0.5em] font-bold burgundy-text mb-8 text-black">Our Mission</h2>
+            <h3 class="text-6xl serif mb-16 leading-tight text-black">Our Mission</h3>
+            <div class="text-gray-700 text-lg font-light leading-relaxed space-y-6">
+                <p>
+                    Established in 2013 by Belgian painter Magda Calleeuw and Belgian pianist Philippe Raskin, the mission of the <a href="http://www.cfipc.com" target="_blank" class="underline hover:text-[#800020] transition">César Franck International Piano Competition</a> is to encourage new generations of young pianists to transcend their own capabilities by providing an international platform.
+                </p>
+                <p>
+                    With around 70 participants originating from about 25 different countries and an internationally acclaimed jury in 2025, the <a href="http://www.cfipc.com" target="_blank" class="underline hover:text-[#800020] transition">César Franck</a> has established itself as a leading competition for young musicians worldwide.
+                </p>
+                <p>
+                    The incorporation of the competition, concerts and educational programs such as this very masterclass with Mto. Volodos as a yearly event symbolizes our commitment and passion to the advancement of culture and education.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <main id="page-bio" class="page-content pt-40 px-8 pb-32 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-xs uppercase tracking-[0.5em] font-bold burgundy-text mb-8 text-center">Biography</h2>
+            <h3 class="text-7xl serif mb-16 text-black text-center">Arcadi Volodos</h3>
+            
+            <div class="space-y-10 text-gray-700 leading-relaxed text-lg font-light">
+                <p class="text-2xl serif italic burgundy-text leading-relaxed text-center mb-16 px-10">
+                    Volodos has everything - imagination, passion and a phenomenal technique - to carry out his ideas on the piano. His limitless virtuosity, combined with a unique sense of rhythm, color and poetry, makes Volodos the narrator of intense stories and infinite worlds!
+                </p>
+
+                <p>
+                    Born in St Petersburg in 1972, Arcadi Volodos began his musical studies with lessons in singing and conducting. He did not begin serious training as a pianist until 1987 at the St Petersburg Conservatory before pursuing advanced studies at the Moscow Conservatory with Galina Egiazarova and in Paris and Madrid.
+                </p>
+
+                <p>
+                    Since making his New York debut in 1996, Volodos has performed throughout the world in recital and with the most eminent orchestras and conductors. He has worked with, among others, the Berliner Philharmoniker, the Israel Philharmonic Orchestra, the London Philharmonia Orchestra, the New York Philharmonic and Munich Philharmonic orchestras, the Royal Concertgebouw Orchestra, the Dresden Staatskapelle, Orchestre de Paris, Leipzig Gewandhausorchester, Zurich Tonhalle Orchestra, and the Boston and Chicago Symphony orchestras, collaborating with conductors such as Myung-Whun Chung, Lorin Maazel, Valery Gergiev, James Levine, Zubin Mehta, Seiji Ozawa, Jukka-Pekka Saraste, Paavo Järvi, Christoph Eschenbach, Semyon Bychkov and Riccardo Chailly.
+                </p>
+
+                <p>
+                    Piano recitals have played a central role in Volodos’s artistic life since he began his career. His repertoire includes major works by Schubert, Schumann, Brahms, Beethoven, Liszt, Rachmaninoff, Scriabin, Prokofiev and Ravel together with less often performed pieces by Mompou, Lecuona and de Falla.
+                </p>
+
+                <p>
+                    Volodos is a regular guest of the most prestigious concert halls in Europe. In the season 2025-26, he will appear at the Barbican Centre in London, Philharmonie de Paris, Teatro alla Scala in Milan, Vienna Konzerthaus, Victoria Hall in Geneva, Tonhalle in Zurich, Elbphilharmonie in Hamburg, Prinzregententheater in Munich, Auditorium National in Madrid as well as in Lisbon, Rome, Brussels, Montecarlo, Lyon, Sevilla and at the Festivals of Salzburg, Roque d’Antheron and Klavier Festival Ruhr.
+                </p>
+
+                <p>
+                    Volodos's recording history is truly unique. Since his Gramophone Award-winning debut at Carnegie Hall in 1999 (Sony Classical), he has built a singular and carefully curated discography. Rather than releasing frequently, Volodos has chosen to craft each album with exceptional artistic depth. Each CD represent a personal artistic statement, offering revelatory interpretations that have earned the most prestigious awards worldwide.
+                </p>
+
+                <p>
+                    Volodos’s early discography includes three iconic recordings that brought him worldwide recognition: Volodos Piano Transcriptions, Volodos Live at Carnegie Hall, and Volodos in Vienna. These were followed by acclaimed live performances with the Berliner Philharmoniker—Rachmaninoff’s Third Piano Concerto conducted by James Levine, and Tchaikovsky’s First Piano Concerto conducted by Seiji Ozawa. In 2007, Volodos Plays Liszt was released to great acclaim, earning numerous international prizes. His 2010 recital at the Musikverein was issued on both CD and DVD, and was met with rapturous critical praise across the globe. In 2013, Volodos released Volodos Plays Mompou, a deeply personal album devoted to the music of Frederic Mompou, which was honored with both a Gramophone Award and the Echo Klassik Prize.
+                </p>
+
+                <p>
+                    Volodos Plays Brahms followed a couple of years later and was immediately considered a landmark in Brahms interpretation. The CD received numerous accolades, including the Edison Classical Award, the Diapason d’Or, and the Gramophone Award. In 2019, Volodos Plays Schubert was released and also received the Edison Classical Award.
+                </p>
+
+                <p>
+                    A new album is set to be released in Spring 2026, featuring a live recording of Volodos in Paris, performing works by Schubert and Schumann.
+                </p>
+
+                <div class="pt-12 border-t border-stone-100 text-center">
+                    <p class="text-xl serif italic text-black mb-2">"Arcadi Volodos: A keyboard poet beyond compare"</p>
+                    <p class="text-xs uppercase tracking-widest font-bold opacity-40">The Independent</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="payment-loader" class="fixed inset-0 z-[200] flex flex-col items-center justify-center invisible opacity-0 transition-all duration-500">
+        <div class="w-12 h-12 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-xs uppercase tracking-[0.4em] font-bold burgundy-text">Securely Redirecting to Stripe</p>
+    </div>
+
+    <footer class="bg-white text-stone-400 py-20 px-6 border-t border-stone-100">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-black font-bold uppercase tracking-widest text-xs">
+            <div>Volodos • Masterclass 2026</div>
+            <div class="flex space-x-8 mt-6 md:mt-0">
+                <a href="#" class="hover:text-[#800020] transition">Contact</a>
+                <a href="#" class="hover:text-[#800020] transition">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const stripePublicKey = 'pk_live_51SzYrsAtuzJSm9YySzBDfoM2Li5ViAXoGbo9n9RxeeAQ4VsK8ygsSBdHatjO7mP7FvpDxntGzjYX2lmYZ9bdD2CK00nuGgROzE';
+        const stripe = (typeof Stripe !== 'undefined') ? Stripe(stripePublicKey) : null;
+
+        // --- ACTUAL STRIPE PAYMENT LINKS INTEGRATED ---
+        const paymentLinks = {
+            'Premium': { 
+                adult: 'https://buy.stripe.com/7sY00igw0gv0bxter9awo00', 
+                student: 'https://buy.stripe.com/9B65kCgw05Qm9pler9awo01' 
+            },
+            'Zone A': { 
+                adult: 'https://buy.stripe.com/6oU6oG7Zugv05950Ajawo02', 
+                student: 'https://buy.stripe.com/14A9ASdjO2EadFB96Pawo03' 
+            },
+            'Zone B': { 
+                adult: 'https://buy.stripe.com/00w00i0x2a6CdFB1Enawo04', 
+                student: 'https://buy.stripe.com/5kQ00idjO7Yu1WTgzhawo05' 
+            },
+            'Zone C': { 
+                adult: 'https://buy.stripe.com/28E5kCfrWfqWgRNgzhawo06', 
+                student: 'https://buy.stripe.com/9B6eVcbbGemSbxt2Irawo07' 
+            },
+            'Balcony A': { 
+                adult: 'https://buy.stripe.com/14A00igw0baGbxter9awo08', 
+                student: 'https://buy.stripe.com/fZu8wO4NibaGdFB96Pawo09' 
+            },
+            'Balcony B': { 
+                adult: 'https://buy.stripe.com/6oUaEWa7C7Yu8lh0Ajawo0a', 
+                student: 'https://buy.stripe.com/6oU8wObbGdiO4510Ajawo0b' 
+            }
+        };
+
+        const zones = {
+            'Premium': { adult: 99, student: 59, totalSeats: 11, booked: 0, oldAdult: null },
+            'Zone A': { adult: 80, student: 50, totalSeats: 45, booked: 0, oldAdult: 90 },
+            'Zone B': { adult: 75, student: 45, totalSeats: 45, booked: 0, oldAdult: 85 },
+            'Zone C': { adult: 60, student: 35, totalSeats: 11, booked: 0, oldAdult: 75 },
+            'Balcony A': { adult: 70, student: 45, totalSeats: 52, booked: 0, oldAdult: 85 },
+            'Balcony B': { adult: 60, student: 35, totalSeats: 52, booked: 0, oldAdult: 75 }
+        };
+
+        let selectedZoneKey = null;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            // Highlight the primary "Information" link if any page from the dropdown is active
+            const navInfo = document.getElementById('nav-info');
+            if (['info', 'project', 'bio'].includes(pageId)) {
+                navInfo.classList.add('active');
+            } else {
+                navInfo.classList.remove('active');
+            }
+            
+            window.scrollTo(0, 0);
+        }
+
+        // Dedicated function for the "Book Now" button to scroll to tickets
+        function goToTickets() {
+            showPage('info'); // Ensure we are on the info page
+            // Give the browser a moment to render the info page before scrolling
+            setTimeout(() => {
+                const ticketsSection = document.getElementById('tickets');
+                if (ticketsSection) {
+                    ticketsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 50);
+        }
+
+        function updateAvailabilityUI() {
+            for (const key in zones) {
+                const zone = zones[key];
+                const btnId = 'btn-' + key.toLowerCase().replace(' ', '-');
+                const labelId = 'price-label-' + key.toLowerCase().replace(' ', '-');
+                const btnEl = document.getElementById(btnId);
+                const labelEl = document.getElementById(labelId);
+
+                if (zone.booked >= zone.totalSeats) {
+                    btnEl.classList.add('sold-out');
+                    labelEl.innerText = 'SOLD OUT';
+                    labelEl.classList.remove('italic');
+                }
+            }
+        }
+
+        function selectZone(name) {
+            const zone = zones[name];
+            if (zone.booked >= zone.totalSeats) return;
+
+            selectedZoneKey = name;
+            document.querySelectorAll('.zone-row').forEach(row => row.classList.remove('zone-selected'));
+            const rowId = 'btn-' + name.toLowerCase().replace(' ', '-');
+            const rowEl = document.getElementById(rowId);
+            if (rowEl) rowEl.classList.add('zone-selected');
+            
+            document.getElementById('placeholder-sidebar').classList.add('hidden');
+            document.getElementById('checkout-sidebar').classList.remove('hidden');
+            document.getElementById('side-zone-name').innerText = name;
+            
+            // Handle display of old/new prices for Adult
+            const oldPriceEl = document.getElementById('price-adult-old');
+            const newPriceEl = document.getElementById('price-adult-new');
+            
+            if (zone.oldAdult) {
+                oldPriceEl.innerText = '€' + zone.oldAdult;
+                oldPriceEl.classList.remove('hidden');
+                newPriceEl.innerText = '€' + zone.adult;
+            } else {
+                oldPriceEl.classList.add('hidden');
+                newPriceEl.innerText = '€' + zone.adult;
+            }
+            
+            document.getElementById('price-student').innerText = '€' + zone.student;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            if (!selectedZoneKey) return;
+            const isStudent = document.querySelector('input[name="ticket-type"]:checked').value === 'student';
+            const total = isStudent ? zones[selectedZoneKey].student : zones[selectedZoneKey].adult;
+            document.getElementById('final-total').innerText = '€' + total;
+        }
+
+        async function handleStripeRedirect() {
+            if (!selectedZoneKey) return;
+            const isStudent = document.querySelector('input[name="ticket-type"]:checked').value === 'student';
+            const linkType = isStudent ? 'student' : 'adult';
+            const redirectUrl = paymentLinks[selectedZoneKey][linkType];
+
+            if (!redirectUrl || redirectUrl === 'LINK_HERE') {
+                alert("Redirection link not configured for this selection.");
+                return;
+            }
+
+            const loader = document.getElementById('payment-loader');
+            loader.classList.remove('invisible');
+            loader.classList.add('visible', 'opacity-100');
+
+            // Actual Redirection to Stripe Payment Link
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 800);
+        }
+
+        updateAvailabilityUI();
+    </script>
+</body>
+</html>
