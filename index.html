@@ -143,12 +143,10 @@
         <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
             <div class="text-2xl font-bold tracking-[0.3em] uppercase cursor-pointer" onclick="showPage('info')">Volodos</div>
             
-            <!-- Updated Navigation with Dropdown -->
             <div class="flex space-x-6 text-[9px] uppercase tracking-[0.2em] font-bold">
                 <div class="relative group">
                     <span onclick="showPage('info')" id="nav-info" class="nav-link active inline-block py-2">Information</span>
                     
-                    <!-- Dropdown Menu -->
                     <div class="dropdown-menu absolute left-0 mt-0 w-48 bg-white border border-stone-100 shadow-xl rounded-b-2xl overflow-hidden py-2">
                         <span onclick="showPage('project')" id="nav-project" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] cursor-pointer transition-colors border-b border-stone-50">Our Project</span>
                         <span onclick="showPage('bio')" id="nav-bio" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] cursor-pointer transition-colors">Biography</span>
@@ -156,7 +154,6 @@
                 </div>
             </div>
 
-            <!-- "Book Now" Button now triggers a specific scroll function -->
             <button onclick="goToTickets()" class="burgundy-bg text-white px-8 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black transition shadow-lg text-center">Book Now</button>
         </div>
     </nav>
@@ -203,11 +200,10 @@
             </div>
         </section>
 
-        <!-- Waiting List Section -->
         <section class="py-24 px-8 bg-stone-50 border-y border-stone-100">
             <div class="max-w-4xl mx-auto text-center">
                 <h2 class="text-xs uppercase tracking-[0.4em] font-bold burgundy-text mb-6">Participant Status</h2>
-                <h3 class="text-4xl serif mb-8 text-black">Masterclass is Fully Booked</h3>
+                <h3 class="text-4xl serif mb-8 text-black">Masterclass is Fully Booked for ACTIVE PARTICIPANTS</h3>
                 <p class="text-gray-700 leading-relaxed text-lg font-light mb-10 max-w-2xl mx-auto">
                     All participant slots for this exclusive masterclass are currently filled. However, we invite you to register for our official waiting list should a position become available.
                 </p>
@@ -217,7 +213,6 @@
             </div>
         </section>
 
-        <!-- Seating Diagram -->
         <section class="py-24 bg-white border-y border-stone-100">
             <div class="max-w-7xl mx-auto px-8 text-black">
                 <h2 class="text-center text-sm uppercase tracking-[0.5em] font-bold mb-16 burgundy-text">Theatre Layout</h2>
@@ -263,7 +258,6 @@
             </div>
         </section>
 
-        <!-- Ticketing Section -->
         <section id="tickets" class="py-32 px-8 bg-white">
             <div class="max-w-6xl mx-auto">
                 <div class="text-center mb-20">
@@ -443,30 +437,30 @@
         const stripePublicKey = 'pk_live_51SzYrsAtuzJSm9YySzBDfoM2Li5ViAXoGbo9n9RxeeAQ4VsK8ygsSBdHatjO7mP7FvpDxntGzjYX2lmYZ9bdD2CK00nuGgROzE';
         const stripe = (typeof Stripe !== 'undefined') ? Stripe(stripePublicKey) : null;
 
-        // --- ACTUAL STRIPE PAYMENT LINKS INTEGRATED ---
+        // --- UPDATED STRIPE PAYMENT LINKS ---
         const paymentLinks = {
             'Premium': { 
                 adult: 'https://buy.stripe.com/7sY00igw0gv0bxter9awo00', 
                 student: 'https://buy.stripe.com/9B65kCgw05Qm9pler9awo01' 
             },
             'Zone A': { 
-                adult: 'https://buy.stripe.com/6oU6oG7Zugv05950Ajawo02', 
+                adult: 'https://buy.stripe.com/eVq14m0x2a6CeJF1Enawo0c', 
                 student: 'https://buy.stripe.com/14A9ASdjO2EadFB96Pawo03' 
             },
             'Zone B': { 
-                adult: 'https://buy.stripe.com/00w00i0x2a6CdFB1Enawo04', 
+                adult: 'https://buy.stripe.com/8x2dR81B60w2451fvdawo0d', 
                 student: 'https://buy.stripe.com/5kQ00idjO7Yu1WTgzhawo05' 
             },
             'Zone C': { 
-                adult: 'https://buy.stripe.com/28E5kCfrWfqWgRNgzhawo06', 
+                adult: 'https://buy.stripe.com/00w28qfrW0w2cBx0Ajawo0e', 
                 student: 'https://buy.stripe.com/9B6eVcbbGemSbxt2Irawo07' 
             },
             'Balcony A': { 
-                adult: 'https://buy.stripe.com/14A00igw0baGbxter9awo08', 
+                adult: 'https://buy.stripe.com/5kQ8wO3Je3IedFBfvdawo0f', 
                 student: 'https://buy.stripe.com/fZu8wO4NibaGdFB96Pawo09' 
             },
             'Balcony B': { 
-                adult: 'https://buy.stripe.com/6oUaEWa7C7Yu8lh0Ajawo0a', 
+                adult: 'https://buy.stripe.com/14A9ASdjOemSdFBdn5awo0g', 
                 student: 'https://buy.stripe.com/6oU8wObbGdiO4510Ajawo0b' 
             }
         };
