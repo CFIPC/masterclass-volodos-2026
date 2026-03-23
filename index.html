@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Arcadi Volodos Piano Masterclass 2026 | Theatre Du Vaudeville Brussels</title>
+    
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    
     <meta name="description" content="Experience a rare live masterclass with piano legend Arcadi Volodos in Brussels. Limited tickets available for the March 2026 event at Theatre Du Vaudeville. Book your seat now.">
     <meta name="keywords" content="Arcadi Volodos, piano masterclass 2026, Volodos Brussels, classical piano lessons, Theatre Du Vaudeville events, Cesar Franck International Piano Competition">
     
@@ -20,8 +24,6 @@
       "name": "Arcadi Volodos Masterclass 2026",
       "startDate": "2026-03-12T16:00",
       "endDate": "2026-03-12T22:00",
-      "eventStatus": "https://schema.org/EventScheduled",
-      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
       "location": {
         "@type": "Place",
         "name": "Theatre Du Vaudeville",
@@ -87,7 +89,6 @@
                 <div class="flex space-x-6 text-[9px] uppercase tracking-[0.2em] font-bold">
                     <div class="relative group">
                         <span class="nav-link active inline-block py-2 t-nav-info">Information</span>
-                        
                         <div class="dropdown-menu absolute left-0 mt-0 w-48 bg-white border border-stone-100 shadow-xl rounded-b-2xl overflow-hidden py-2">
                             <a href="/our-project/" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] transition-colors border-b border-stone-50 t-nav-project">Our Project</a>
                             <a href="/biography/" class="block px-6 py-4 hover:bg-stone-50 hover:text-[#800020] transition-colors t-nav-bio">Biography</a>
@@ -224,11 +225,6 @@
         </section>
     </main>
 
-    <div id="payment-loader" class="fixed inset-0 z-[200] flex flex-col items-center justify-center invisible opacity-0 transition-all duration-500">
-        <div class="w-12 h-12 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p class="text-xs uppercase tracking-[0.4em] font-bold burgundy-text t-redir-tag">Securely Redirecting to Stripe</p>
-    </div>
-
     <footer class="bg-white text-stone-400 py-20 px-6 border-t border-stone-100">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-black font-bold uppercase tracking-widest text-xs">
             <div>Volodos • Masterclass 2026</div>
@@ -266,8 +262,6 @@
         function selectZone(name) { selectedZoneKey = name; document.querySelectorAll('.zone-row').forEach(row => row.classList.remove('zone-selected')); document.getElementById('btn-' + name.toLowerCase().replace(' ', '-')).classList.add('zone-selected'); document.getElementById('placeholder-sidebar').classList.add('hidden'); document.getElementById('checkout-sidebar').classList.remove('hidden'); document.getElementById('side-zone-name').innerText = name; document.getElementById('price-adult-new').innerText = '€' + zones[name].adult; document.getElementById('price-student').innerText = '€' + zones[name].student; updateTotal(); }
         function updateTotal() { if (!selectedZoneKey) return; const isStudent = document.querySelector('input[name="ticket-type"]:checked').value === 'student'; document.getElementById('final-total').innerText = '€' + (isStudent ? zones[selectedZoneKey].student : zones[selectedZoneKey].adult); }
         async function handleStripeRedirect() { if (!selectedZoneKey) return; const isStudent = document.querySelector('input[name="ticket-type"]:checked').value === 'student'; window.location.href = paymentLinks[selectedZoneKey][isStudent ? 'student' : 'adult']; }
-    <link rel="icon" type="image/png" href="/favicon.png">
-        <link rel="apple-touch-icon" href="/favicon.png">
     </script>
 </body>
 </html>
